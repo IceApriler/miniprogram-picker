@@ -56,7 +56,7 @@ module.exports = {
     'node/process-exit-as-throw': 'error',
     'object-curly-spacing': [
       'error',
-      'never'
+      'always'
     ],
     'operator-linebreak': [
       'error',
@@ -81,7 +81,8 @@ module.exports = {
     'semi': [
       'error',
       'never'
-    ]
+    ],
+    'no-console': 'off'
   },
   'globals': {
     'window': true,
