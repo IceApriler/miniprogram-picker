@@ -1,1 +1,22 @@
-<comp></comp>
+<!-- 多级联动 -->
+<!-- 
+  origin: 源数组，格式必须为数组和对象的集合，参考示例
+  steps: 多级联动的阶数，默认为0
+  name: 多级联动展示数据的字段名称，默认为name
+  subset: 多级联动的子节点的字段名称，默认为subset
+  otherFields: 若需要额外返回其他字段的数据，可以设置otherFields为数组，参考示例
+  autoSelect: 初始化时，自动选择每列第0项
+  bindchange: 回调函数，参考示例
+ -->
+<comp
+  sourceData="{{originMultiArray}}"
+  steps="{{steps}}"
+  shownFieldName="{{name}}"
+  subsetFieldName="{{subset}}"
+  otherNeedFieldsName="{{otherFields}}"
+  autoSelect
+  bindchange="mutiPickerChange">
+    <view class="picker">
+      当前选择：<text wx:for="{{result}}" wx:key="index">{{item[name]}}，</text>
+    </view>
+</comp>
