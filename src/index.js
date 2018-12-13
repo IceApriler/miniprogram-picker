@@ -34,6 +34,11 @@ Component({
       type: Array,
       value: []
     },
+    // 选择了第n列后，是否将大于n的列的选择值自动初始化为0
+    initColumnSelectedIndex: {
+      type: Boolean,
+      value: false,
+    }
   },
 
   /**
@@ -64,6 +69,7 @@ Component({
   methods: {
     /**
      * 监听源数组更新变化
+     *
      * @param {Array} newSourceData 源数组，newSourceData有几维，Picker就可以有几阶。
      */
     sourceDataChange(newSourceData) {
@@ -112,10 +118,11 @@ Component({
         multiIndex,
         multiArray
       })
-      console.log(this.data)
     },
+
     /**
      * 校验源数组是否正确
+     *
      * @param {Array} sourceData 源数组
      */
     checkSourceData(sourceData) {
@@ -149,23 +156,39 @@ Component({
       handle(sourceData)
       return { countError }
     },
-    // 点击确定
-    bindMultiPickerChange(e) {
+
+    /**
+     * 用户点击了确认。
+     *
+     * @param {Object} e 事件对象，具体参考微信小程序api。
+     * @param {Array} e.detail.value 用户选择的下标数组。
+     */
+    pickerChange(e) {
       console.log('picker发送选择改变，携带值为', e.detail.value)
 
       this.setData({
         multiIndex: e.detail.value
       })
-      this.UpdateData()
+      this.processData()
     },
-    // 更新数据
-    UpdateData() {
-      const { shownFieldName, subsetFieldName, otherNeedFieldsName } = this.data
+
+    /**
+     * 处理最终数据，将返回给开发者。
+     *
+     */
+    processData() {
+      const {
+        sourceData,
+        shownFieldName,
+        subsetFieldName,
+        otherNeedFieldsName,
+        multiIndex
+      } = this.data
       const selectedArray = []
 
-      const handle = (value = [], columnIndex = 0) => {
-        value.forEach((item, index) => {
-          if (index === this.data.multiIndex[columnIndex]) {
+      const handle = (source = [], columnIndex = 0) => {
+        source.forEach((item, index) => {
+          if (index === multiIndex[columnIndex]) {
             const selectedItem = {}
             selectedItem[shownFieldName] = item[shownFieldName]
             otherNeedFieldsName.forEach(key => {
@@ -178,28 +201,34 @@ Component({
           }
         })
       }
-      handle(this.data.sourceData)
+      handle(sourceData)
 
       this.setData({
         selectedArray
       })
 
       const detail = {
-        multiIndex: this.data.multiIndex,
+        selectedIndex: this.data.multiIndex,
         selectedArray: this.data.selectedArray
       }
       this.triggerEvent('change', detail)
     },
-    // 多级联动发生变化
-    bindMultiPickerColumnChange(e) {
+
+    /**
+     * 用户滚动了某一列。
+     *
+     * @param {Object} e 事件对象，具体参考微信小程序api。
+     */
+    pickerColumnChange(e) {
       const {
         shownFieldName,
         subsetFieldName,
         multiArray,
-        multiIndex,
         sourceData,
-        steps
+        steps,
+        initColumnSelectedIndex
       } = this.data
+      let { multiIndex } = this.data
       const { column, value: changeIndex } = e.detail
 
       console.log(`修改了Picker的第${column}列(从0开始计算)，选中了第${changeIndex}个值(从0开始计算)`)
@@ -207,20 +236,17 @@ Component({
       // multiIndex变化了，所以也要同步更新multiArray
       multiIndex[column] = changeIndex
 
-      // 每次重置之后的index为0，但是有bug，待定
-      // let _multiIndex = []
-      // multiIndex.map((item, index) => {
-      //   if (column >= index) {
-      //     _multiIndex.push(item)
-      //   }else {
-      //     _multiIndex.push(0)
-      //   }
-      // })
-      // multiIndex = _multiIndex
-
-      /**
-       * 假设 multiIndex的数据结构为 [1,2,2];  三阶 this.data.steps = 3
-       */
+      if (initColumnSelectedIndex) {
+        // 每次重置之后的index为0，但是有bug，待定。 => 经检查，是编辑器的问题，真机上是没有问题的。
+        const _multiIndex = multiIndex.map((item, index) => {
+          if (column >= index) {
+            return item
+          } else {
+            return 0
+          }
+        })
+        multiIndex = _multiIndex
+      }
 
       const handle = (source = [], columnIndex = 0) => {
         // 当前遍历第 columnIndex 列
@@ -245,16 +271,13 @@ Component({
         multiArray,
         multiIndex,
       })
-
-      console.log(this.multiIndex)
-      console.log(this.data)
     },
   },
 
   lifetimes: {
     attached() {
       if (this.data.autoSelect) {
-        this.UpdateData()
+        this.processData()
       }
     }
   }
