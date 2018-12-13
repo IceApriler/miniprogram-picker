@@ -3,7 +3,7 @@ Component({
    * 组件的属性列表
    */
   properties: {
-    // 是否需要填充默认选择结果
+    // 初始化时，是否需要自动返回结果给开发者
     autoSelect: {
       type: Boolean,
       value: false
@@ -38,6 +38,21 @@ Component({
     initColumnSelectedIndex: {
       type: Boolean,
       value: false,
+    },
+    // 默认选中项的下标数组
+    defaultIndex: {
+      type: Array,
+      value: []
+    },
+    // 默认选中项的值数组
+    defaultValue: {
+      type: Array,
+      value: []
+    },
+    // 默认选中项的值数组的唯一字段，用来和源数组进行比对
+    defaultValueUniqueField: {
+      type: String,
+      value: ''
     }
   },
 
@@ -55,7 +70,7 @@ Component({
       type: Array,
       value: [],
     },
-    // 用户点击Confirm后，所选择的值数组 => 比如:
+    // 用户点击确定后，所选择的值数组 => 比如:
     // [{name: '河北', id: '3110'}, {name: '石家庄', id: '3110xx'}, {name: '长安区', id: '3110xxx'}]。
     selectedArray: {
       type: Array,
@@ -79,8 +94,9 @@ Component({
       const multiArray = []
       const { countError } = this.checkSourceData(newSourceData)
       if (countError > 0) {
-        console.warn(`miniprogram-picker: 检测到源数组中有${countError}个错误，为了方便排查修改已经为您做出了相关提示，请修改后再试，务必保证数据源的数据结构无误。`)
+        console.warn(`miniprogram-picker: 检测到源数组中有${countError}个错误，为了方便排查修改已经为你做出了相关提示，请修改后再试，务必保证数据源的数据结构无误。`)
       }
+      const defaultIndex = this.getDefaultIndex(newSourceData)
       const handle = (source = [], columnIndex = 0) => {
         // 当前遍历Picker的第columnIndex列，
         // 当columnIndex = 0时，source表示sourceData，其它则表示子集subset
@@ -92,7 +108,7 @@ Component({
             _multiArrayColumn0.push(item[shownFieldName])
           }
 
-          if (item[shownFieldName] && index === 0) {
+          if (item[shownFieldName] && index === (defaultIndex[columnIndex] || 0)) {
             // 选中的索引和值，默认取每列的第0个
             multiIndex.push(index)
 
@@ -118,6 +134,58 @@ Component({
         multiIndex,
         multiArray
       })
+    },
+    getDefaultIndex(newSourceData) {
+      const {
+        defaultIndex,
+        defaultValue,
+        defaultValueUniqueField,
+        steps,
+        subsetFieldName
+      } = this.data
+      if (defaultIndex.length) {
+        return defaultIndex
+      } else if (defaultValue.length) {
+        if (!defaultValueUniqueField) {
+          console.error(new Error('你设置了"defaultValue"字段, 但是没有设置defaultValueUniqueField，这将无法识别默认选项，请补充后再试。'))
+        }
+        const _defaultIndex = []
+        const handle = (source = [], columnIndex = 0) => {
+          // 默认值
+          _defaultIndex[columnIndex] = 0
+          // 若是有报错，则Interrupt为true，将中断
+          let Interrupt = false
+          source.forEach((item, index) => {
+            if (!item[defaultValueUniqueField]) {
+              Interrupt = true
+              console.error(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${defaultValueUniqueField}"字段`))
+            } else {
+              defaultValue.forEach((def, key) => {
+                if (!def[defaultValueUniqueField]) {
+                  Interrupt = true
+                  console.error(def, new Error(`"defaultValue"中第${key}项(从0开始计算)的对象中缺少"${defaultValueUniqueField}"字段`))
+                }
+                if (!Interrupt &&
+                  (def[defaultValueUniqueField] === item[defaultValueUniqueField])) {
+                  // 相等则表示选中
+                  _defaultIndex[columnIndex] = index
+                }
+              })
+
+              if (columnIndex < steps - 1) {
+                if (item[subsetFieldName]) {
+                  // 开始处理下一维的数据
+                  handle(item[subsetFieldName], columnIndex + 1)
+                }
+              }
+            }
+          })
+        }
+        handle(newSourceData)
+        return _defaultIndex
+      } else {
+        return []
+      }
     },
 
     /**

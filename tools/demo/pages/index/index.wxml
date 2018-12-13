@@ -7,6 +7,9 @@
   otherNeedFieldsName: 若需要额外返回其他字段的数据，可以设置otherFields为数组，参考示例
   autoSelect: 初始化时，自动选择每列的第0项，返回给开发者。
   initColumnSelectedIndex: 选择了第n列后，是否将大于n的列的自动初始化第0个(滚动至最上层)
+  defaultIndex: 默认选中项的下标数组，优先于defaultValue
+  defaultValue: 默认选中项的值数组，此字段生效时，defaultValueUniqueField必填
+  defaultValueUniqueField: 默认选中项的值数组的唯一字段，用来和源数组进行比对
   bindchange: 回调函数，参考示例
  -->
 <comp
@@ -15,7 +18,9 @@
   shownFieldName="{{name}}"
   subsetFieldName="{{subset}}"
   otherNeedFieldsName="{{otherFields}}"
-  autoSelect="{{false}}"
+  defaultValue="{{[{name: '2'}, {name: '2.2'}, {name: '2.2.1'}]}}"
+  defaultValueUniqueField="{{'name'}}"
+  autoSelect="{{true}}"
   initColumnSelectedIndex
   bindchange="pickerChange">
     <view class="picker">
