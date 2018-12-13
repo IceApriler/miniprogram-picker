@@ -79,11 +79,17 @@ Page({
       }
     ]
   },
-
-  mutiPickerChange(e) {
-    console.log('多级联动结果：', e.detail)
+  /**
+   * Picker的确认回调函数
+   *
+   * @param {Object} e.detail.selectedIndex 用户选择的数据在数组中所在的下标
+   * @param {Object} e.detail.selectedArray 用户选择的数据
+   */
+  pickerChange(e) {
+    const { selectedIndex, selectedArray } = e.detail
+    console.log('多级联动结果:', selectedIndex, selectedArray)
     this.setData({
-      result: e.detail.selectedArray
+      result: selectedArray
     })
   }
 })
