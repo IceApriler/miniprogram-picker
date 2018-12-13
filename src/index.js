@@ -8,7 +8,7 @@ Component({
       type: Boolean,
       value: false
     },
-    // 源数据
+    // 源数组，sourceData有几维，Picker就可以有几阶
     sourceData: {
       type: Array,
       value: [],
@@ -40,17 +40,18 @@ Component({
    * 组件的初始数据
    */
   data: {
-    // 当前所选择的索引数组
+    // Picker当前所选择的索引数组 => 比如:[0, 0, 2]，表示第一列选择第0项，第二列选择第0项，第三列选择第2项。
     multiIndex: {
       type: Array,
       value: [],
     },
-    // 当前所展示的数组
+    // Picker当前所展示的数组 => 比如:[['河北', '山东'], ['石家庄', '保定'], ['桥西区', '裕华区', '长安区']]。
     multiArray: {
       type: Array,
       value: [],
     },
-    // 当前所选择的值数组
+    // 用户点击Confirm后，所选择的值数组 => 比如:
+    // [{name: '河北', id: '3110'}, {name: '石家庄', id: '3110xx'}, {name: '长安区', id: '3110xxx'}]。
     selectedArray: {
       type: Array,
       value: [],
@@ -62,57 +63,91 @@ Component({
    */
   methods: {
     /**
-     * 监听源数据更新变化
-     * @param {Array} newVal
+     * 监听源数组更新变化
+     * @param {Array} newSourceData 源数组，newSourceData有几维，Picker就可以有几阶。
      */
-    sourceDataChange(newVal) {
-      const { shownFieldName, subsetFieldName } = this.data
-      // 源数据更新，则需要更新multiIndex、multiArray
+    sourceDataChange(newSourceData) {
+      const { shownFieldName, subsetFieldName, steps } = this.data
+      // 源数组更新，则需要更新multiIndex、multiArray
       const multiIndex = []
       const multiArray = []
+      const { countError } = this.checkSourceData(newSourceData)
+      if (countError > 0) {
+        console.warn(`miniprogram-picker: 检测到源数组中有${countError}个错误，为了方便排查修改已经为您做出了相关提示，请修改后再试，务必保证数据源的数据结构无误。`)
+      }
+      const handle = (source = [], columnIndex = 0) => {
+        // 当前遍历Picker的第columnIndex列，
+        // 当columnIndex = 0时，source表示sourceData，其它则表示子集subset
+        const _multiArrayColumn0 = []
 
-      // 无初始选择值，则默认选每列第0条
-      const _multiArray = newVal.map((item) => {
-        if (!item[shownFieldName]) {
-          console.error(item, new Error(`源数据缺少"${shownFieldName}"`))
-        }
-        return item[shownFieldName]
-      })
+        source.forEach((item, index) => {
+          if (columnIndex === 0) {
+            // newSourceData的第0维要单独处理，最后unshift到multiArray中
+            _multiArrayColumn0.push(item[shownFieldName])
+          }
 
-      const handle = (value = [], columnIndex = 0) => {
-        // 当前遍历第 columnIndex 列
-        value.forEach((item, index) => {
           if (item[shownFieldName] && index === 0) {
             // 选中的索引和值，默认取每列的第0个
             multiIndex.push(index)
 
-            if (columnIndex < this.data.steps - 1) {
+            if (columnIndex < steps - 1) {
               if (item[subsetFieldName]) {
-                const _arr = item[subsetFieldName].map(i => {
-                  if (!i[shownFieldName]) {
-                    console.error(item[subsetFieldName], new Error(`源数据缺少"${shownFieldName}"`))
-                  }
-                  return i[shownFieldName]
-                })
-                multiArray.push(_arr)
-              } else {
-                console.error(item, new Error(`源数据缺少"${subsetFieldName}"`))
+                // 开始处理下一维的数据
+                const _subsetArr = item[subsetFieldName].map(sub => sub[shownFieldName])
+                multiArray.push(_subsetArr)
+                handle(item[subsetFieldName], columnIndex + 1)
               }
-
-              handle(item[subsetFieldName], columnIndex + 1)
             }
           }
         })
+
+        if (columnIndex === 0) {
+          multiArray.unshift(_multiArrayColumn0)
+        }
       }
 
-      multiArray.unshift(_multiArray)
-      handle(newVal)
+      handle(newSourceData)
 
       this.setData({
         multiIndex,
         multiArray
       })
       console.log(this.data)
+    },
+    /**
+     * 校验源数组是否正确
+     * @param {Array} sourceData 源数组
+     */
+    checkSourceData(sourceData) {
+      const { shownFieldName, subsetFieldName, steps } = this.data
+      let countError = 0
+      const handle = (source = [], columnIndex = 0) => {
+        // 当前遍历Picker的第columnIndex列，
+        // 当columnIndex = 0时，source表示sourceData，其它则表示子集subset
+
+        source.forEach((item) => {
+          if (!item[shownFieldName]) {
+            countError++
+            console.error(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${shownFieldName}"字段`))
+          }
+
+          if (item[shownFieldName]) {
+            // 有shownFieldName字段才会去遍历subsetFieldName字段
+            if (columnIndex < steps - 1) {
+              if (item[subsetFieldName]) {
+                // 开始处理下一维的数据
+                handle(item[subsetFieldName], columnIndex + 1)
+              } else {
+                countError++
+                console.error(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${subsetFieldName}"字段`))
+              }
+            }
+          }
+        })
+      }
+
+      handle(sourceData)
+      return { countError }
     },
     // 点击确定
     bindMultiPickerChange(e) {
@@ -128,7 +163,7 @@ Component({
       const { shownFieldName, subsetFieldName, otherNeedFieldsName } = this.data
       const selectedArray = []
 
-      const handle = (value, columnIndex = 0) => {
+      const handle = (value = [], columnIndex = 0) => {
         value.forEach((item, index) => {
           if (index === this.data.multiIndex[columnIndex]) {
             const selectedItem = {}
@@ -157,67 +192,61 @@ Component({
     },
     // 多级联动发生变化
     bindMultiPickerColumnChange(e) {
-      console.log('修改的列为', e, e.detail.column, '，值为', e.detail.value)
+      const {
+        shownFieldName,
+        subsetFieldName,
+        multiArray,
+        multiIndex,
+        sourceData,
+        steps
+      } = this.data
+      const { column, value: changeIndex } = e.detail
 
-      const { shownFieldName, subsetFieldName } = this.data
-      // 第column列
-      const column = e.detail.column
-      // 第column列的第changeIndex个
-      const changeIndex = e.detail.value
+      console.log(`修改了Picker的第${column}列(从0开始计算)，选中了第${changeIndex}个值(从0开始计算)`)
 
-      const data = {
-        multiArray: this.data.multiArray,
-        multiIndex: this.data.multiIndex,
-
-        sourceData: this.data.sourceData
-      }
       // multiIndex变化了，所以也要同步更新multiArray
-      data.multiIndex[column] = changeIndex
+      multiIndex[column] = changeIndex
 
       // 每次重置之后的index为0，但是有bug，待定
       // let _multiIndex = []
-      // data.multiIndex.map((item, index) => {
+      // multiIndex.map((item, index) => {
       //   if (column >= index) {
       //     _multiIndex.push(item)
       //   }else {
       //     _multiIndex.push(0)
       //   }
       // })
-      // data.multiIndex = _multiIndex
+      // multiIndex = _multiIndex
 
       /**
-       * 假设 data.multiIndex的数据结构为 [1,2,2];  三阶 this.data.steps = 3
+       * 假设 multiIndex的数据结构为 [1,2,2];  三阶 this.data.steps = 3
        */
 
-      const handle = (value = [], columnIndex = 0) => {
+      const handle = (source = [], columnIndex = 0) => {
         // 当前遍历第 columnIndex 列
-        value.forEach((item, index) => {
-          if (index === data.multiIndex[columnIndex]) {
-            if (columnIndex < this.data.steps - 1) {
+        source.forEach((item, index) => {
+          if (index === multiIndex[columnIndex]) {
+            if (columnIndex < steps - 1) {
               if (!item[subsetFieldName]) {
                 item[subsetFieldName] = []
               }
-              const multiArrayItem = item[subsetFieldName].map((item2) => {
-                if (!item2[shownFieldName]) {
-                  console.error(item[subsetFieldName], new Error(`缺少"${shownFieldName}"`))
-                }
-                return item2[shownFieldName]
-              })
-              data.multiArray[columnIndex + 1] = multiArrayItem
+              const multiArrayItem = item[subsetFieldName].map((sub) => sub[shownFieldName])
+              // 从第1列开始，才有可能变化
+              multiArray[columnIndex + 1] = multiArrayItem
 
               handle(item[subsetFieldName], columnIndex + 1)
             }
           }
         })
       }
-      handle(data.sourceData)
+      handle(sourceData)
 
       this.setData({
-        multiArray: data.multiArray,
-        multiIndex: data.multiIndex,
+        multiArray,
+        multiIndex,
       })
 
-      console.log(this.data.multiIndex)
+      console.log(this.multiIndex)
       console.log(this.data)
     },
   },
