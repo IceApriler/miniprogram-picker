@@ -1,7 +1,7 @@
 <picker 
   mode="multiSelector"
-  bindchange="bindMultiPickerChange"
-  bindcolumnchange="bindMultiPickerColumnChange"
+  bindchange="pickerChange"
+  bindcolumnchange="pickerColumnChange"
   value="{{multiIndex}}"
   range="{{multiArray}}">
   <slot></slot>
