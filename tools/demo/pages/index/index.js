@@ -60,8 +60,8 @@ Page({
    * Picker用户点击确认时触发
    *
    * @param {Object} e pickerChange的事件对象
-   * @param {Object} e.detail.selectedIndex 用户选择的数据在数组中所在的下标
-   * @param {Object} e.detail.selectedArray 用户选择的数据
+   * @param {Array} e.detail.selectedIndex 用户选择的数据在数组中所在的下标
+   * @param {Array} e.detail.selectedArray 用户选择的数据
    */
   pickerChange(e) {
     const { picker } = e.currentTarget.dataset
