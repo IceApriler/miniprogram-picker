@@ -1,7 +1,7 @@
 <!-- 多级联动 -->
 <!-- 
   sourceData: 源数组，格式必须为数组和对象的集合，参考示例
-  steps: 多级联动的阶数，默认为0
+  steps: 多级联动的阶数，默认为1
   shownFieldName: 多级联动展示数据的字段名称，默认为name
   subsetFieldName: 多级联动的子节点的字段名称，默认为subset
   otherNeedFieldsName: 若需要额外返回其他字段的数据，可以设置otherFields为数组，参考示例
@@ -13,17 +13,33 @@
   bindchange: 回调函数，参考示例
  -->
 <comp
-  sourceData="{{originMultiArray}}"
-  steps="{{steps}}"
-  shownFieldName="{{name}}"
-  subsetFieldName="{{subset}}"
-  otherNeedFieldsName="{{otherFields}}"
+  sourceData="{{sourceData_1}}"
+  steps="{{3}}"
+  shownFieldName="{{'name'}}"
+  subsetFieldName="{{'sonValue'}}"
+  otherNeedFieldsName="{{['id', 'other']}}"
   defaultValue="{{[{name: '2'}, {name: '2.2'}, {name: '2.2.1'}]}}"
   defaultValueUniqueField="{{'name'}}"
   autoSelect="{{true}}"
   initColumnSelectedIndex
-  bindchange="pickerChange">
+  bindchange="pickerChange_1">
     <view class="picker">
-      当前选择：<text wx:for="{{result}}" wx:key="index">{{item[name]}}，</text>
+      当前选择：<view wx:for="{{result_1}}" wx:key="index">{{item['name']}}</view>
+    </view>
+</comp>
+
+<comp
+  sourceData="{{sourceData_2}}"
+  steps="{{2}}"
+  shownFieldName="{{'name'}}"
+  subsetFieldName="{{'nextLevel'}}"
+  otherNeedFieldsName="{{['code']}}"
+  defaultValue="{{[{code: '0110'}, {code: '011002'}]}}"
+  defaultValueUniqueField="{{'code'}}"
+  autoSelect="{{true}}"
+  initColumnSelectedIndex
+  bindchange="pickerChange_2">
+    <view class="picker">
+      当前选择：<view wx:for="{{result_2}}" wx:key="index">{{item['name']}}</view>
     </view>
 </comp>

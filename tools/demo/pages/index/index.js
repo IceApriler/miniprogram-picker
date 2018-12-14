@@ -3,12 +3,9 @@ Page({
    * 页面的初始数据
    */
   data: {
-    result: [],
-    steps: 3,
-    name: 'name',
-    subset: 'sonValue',
-    otherFields: ['id', 'city'],
-    originMultiArray: [
+    result_1: [],
+    result_2: [],
+    sourceData_1: [
       {
         id: '01',
         name: '1',
@@ -77,6 +74,10 @@ Page({
           }
         ]
       }
+    ],
+    sourceData_2: [
+      { name: '河北', code: '0311', nextLevel: [{ name: '石家庄', code: '031101' }, { name: '保定', code: '031102' }]},
+      { name: '北京', code: '0110', nextLevel: [{ name: '朝阳', code: '011001' }, { name: '海淀', code: '011002' }]},
     ]
   },
   /**
@@ -85,11 +86,24 @@ Page({
    * @param {Object} e.detail.selectedIndex 用户选择的数据在数组中所在的下标
    * @param {Object} e.detail.selectedArray 用户选择的数据
    */
-  pickerChange(e) {
+  pickerChange_1(e) {
     const { selectedIndex, selectedArray } = e.detail
     console.log('多级联动结果:', selectedIndex, selectedArray)
     this.setData({
-      result: selectedArray
+      result_1: selectedArray
+    })
+  },
+  /**
+   * Picker的确认回调函数
+   *
+   * @param {Object} e.detail.selectedIndex 用户选择的数据在数组中所在的下标
+   * @param {Object} e.detail.selectedArray 用户选择的数据
+   */
+  pickerChange_2(e) {
+    const { selectedIndex, selectedArray } = e.detail
+    console.log('多级联动结果:', selectedIndex, selectedArray)
+    this.setData({
+      result_2: selectedArray
     })
   }
 })
