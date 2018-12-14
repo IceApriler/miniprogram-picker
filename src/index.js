@@ -53,6 +53,11 @@ Component({
     defaultValueUniqueField: {
       type: String,
       value: ''
+    },
+    // 是否禁用
+    disabled: {
+      type: Boolean,
+      value: false,
     }
   },
 
@@ -339,6 +344,10 @@ Component({
         multiArray,
         multiIndex,
       })
+      this.triggerEvent('columnchange', e)
+    },
+    pickerCancel(e) {
+      this.triggerEvent('cancel', e)
     },
   },
 

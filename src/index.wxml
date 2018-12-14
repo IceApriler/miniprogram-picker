@@ -2,6 +2,8 @@
   mode="multiSelector"
   bindchange="pickerChange"
   bindcolumnchange="pickerColumnChange"
+  bindcancel="pickerCancel"
+  disabled="{{disabled}}"
   value="{{multiIndex}}"
   range="{{multiArray}}">
   <slot></slot>
