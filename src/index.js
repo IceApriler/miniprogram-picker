@@ -17,7 +17,7 @@ Component({
     // 阶数
     steps: {
       type: Number,
-      value: 0
+      value: 1
     },
     // 展示数据的字段名称
     shownFieldName: {
