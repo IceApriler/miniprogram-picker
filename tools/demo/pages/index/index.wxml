@@ -22,7 +22,11 @@
   defaultValueUniqueField="{{'name'}}"
   autoSelect="{{true}}"
   initColumnSelectedIndex
-  bindchange="pickerChange_1">
+  disabled="{{false}}"
+  bindchange="pickerChange"
+  bindcancel="pickerCancel"
+  bindcolumnchange="pickerColumnchange"
+  data-picker="picker_1">
     <view class="picker">
       当前选择：<view wx:for="{{result_1}}" wx:key="index">{{item['name']}}</view>
     </view>
@@ -38,7 +42,11 @@
   defaultValueUniqueField="{{'code'}}"
   autoSelect="{{true}}"
   initColumnSelectedIndex
-  bindchange="pickerChange_2">
+  disabled="{{false}}"
+  bindchange="pickerChange"
+  bindcancel="pickerCancel"
+  bindcolumnchange="pickerColumnchange"
+  data-picker="picker_2">
     <view class="picker">
       当前选择：<view wx:for="{{result_2}}" wx:key="index">{{item['name']}}</view>
     </view>
