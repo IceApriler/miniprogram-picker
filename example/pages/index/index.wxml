@@ -1,0 +1,41 @@
+<!--index.wxml-->
+<!-- 多级联动 -->
+<miniprogram-picker
+  sourceData="{{sourceData_1}}"
+  steps="{{3}}"
+  shownFieldName="{{'name'}}"
+  subsetFieldName="{{'sonValue'}}"
+  otherNeedFieldsName="{{['id', 'other']}}"
+  defaultValue="{{[{name: '2'}, {name: '2.2'}, {name: '2.2.1'}]}}"
+  defaultValueUniqueField="{{'name'}}"
+  autoSelect="{{true}}"
+  initColumnSelectedIndex
+  disabled="{{false}}"
+  bindchange="pickerChange"
+  bindcancel="pickerCancel"
+  bindcolumnchange="pickerColumnchange"
+  data-picker="picker_1">
+    <view class="picker">
+      当前选择：<view wx:for="{{result_1}}" wx:key="index">{{item['name']}}</view>
+    </view>
+</miniprogram-picker>
+
+<miniprogram-picker
+  sourceData="{{sourceData_2}}"
+  steps="{{2}}"
+  shownFieldName="{{'name'}}"
+  subsetFieldName="{{'nextLevel'}}"
+  otherNeedFieldsName="{{['code']}}"
+  defaultValue="{{[{code: '0110'}, {code: '011002'}]}}"
+  defaultValueUniqueField="{{'code'}}"
+  autoSelect="{{true}}"
+  initColumnSelectedIndex
+  disabled="{{false}}"
+  bindchange="pickerChange"
+  bindcancel="pickerCancel"
+  bindcolumnchange="pickerColumnchange"
+  data-picker="picker_2">
+    <view class="picker">
+      当前选择：<view wx:for="{{result_2}}" wx:key="index">{{item['name']}}</view>
+    </view>
+</miniprogram-picker>
