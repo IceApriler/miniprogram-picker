@@ -14,3 +14,6 @@ docs
 miniprogram_dev
 node_modules
 coverage
+
+.vscode
+miniprogram_npm
