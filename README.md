@@ -1,14 +1,24 @@
 # miniprogram-picker
 
-### 简介
+## 简介
 
 - 微信小程序的Picker组件只是半成品组件，在启用多级联动时需要监听`bindcolumnchange`事件，来手动更改`range`和`value`的值，从而完成Picker的联动变化，比较麻烦，不利于在不同的业务逻辑中的复用。
 - 本组件为了解决以上痛点，对微信小程序原生Picker组件进行了二次封装。开发者只需要提供固定数据结构的`sourceData`，再进行一些必要配置，本组件就可以自动帮助开发者处理联动逻辑。
 - 本组件支持npm构建，从小程序基础库版本`2.2.1`或以上、及`开发者工具1.02.1808300`或以上开始，小程序支持使用 npm 安装第三方包。
 
+## 效果
+
+<div style="display: flex; flex-direction: row; align-items: center; justify-content: space-around;">
+  <a href="./source"><img src="./source/WX20181217-105545@2x.png" width="300" alt="WX20181217-105545@2x"/></a>
+  <a href="./source"><img src="./source/WX20181217-105613@2x.png" width="300" alt="WX20181217-105545@2x"/></a>
+</div>
+<div style="display: flex; flex-direction: row; align-items: center; justify-content: center; margin-top: 30px;">
+  <a href="./source"><img src="./source/WX20181217-105849@2x.png" width="600" alt="WX20181217-105545@2x"/></a>
+</div>
+
 ## API
 
-#### 属性
+### 属性
 
 |          属性           |                             说明                             |  类型   |  默认值  | 是否必填 |
 | :---------------------: | :----------------------------------------------------------: | :-----: | :------: | :------: |
@@ -24,7 +34,7 @@
 | initColumnSelectedIndex |     选择了第n列后，是否将大于n的列的选择值自动初始化为0      | Boolean |  false   |  false   |
 |        disabled         |                         是否禁用                    | Boolean |  false   |  false   |
 
-#### 方法
+### 方法
 
 |       方法       |             说明             |    类型     |                         事件对象                          |
 | :--------------: | :--------------------------: | :---------: | :-------------------------------------------------------: |
