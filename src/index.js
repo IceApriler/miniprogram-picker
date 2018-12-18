@@ -1,3 +1,5 @@
+/* 参考文档: https://github.com/IceApriler/miniprogram-picker */
+
 Component({
   /**
    * 组件的属性列表
@@ -99,47 +101,52 @@ Component({
       const multiArray = []
       const { countError } = this.checkSourceData(newSourceData)
       if (countError > 0) {
-        console.warn(`miniprogram-picker: 检测到源数组中有${countError}个错误，为了方便排查修改已经为你做出了相关提示，请修改后再试，务必保证数据源的数据结构无误。`)
-      }
-      const defaultIndex = this.getDefaultIndex(newSourceData)
-      const handle = (source = [], columnIndex = 0) => {
-        // 当前遍历Picker的第columnIndex列，
-        // 当columnIndex = 0时，source表示sourceData，其它则表示子集subset
-        const _multiArrayColumn0 = []
+        console.warn(`miniprogram-picker: 初始化源数组时检测到有${countError}个错误，为了方便排查修改已经为你做出了相关提示，请修改后再试，务必保证数据源的数据结构无误。`)
+      } else {
+        const defaultIndex = this.getDefaultIndex(newSourceData)
+        const handle = (source = [], columnIndex = 0) => {
+          // 当前遍历Picker的第columnIndex列，
+          // 当columnIndex = 0时，source表示sourceData，其它则表示子集subset
+          const _multiArrayColumn0 = []
 
-        source.forEach((item, index) => {
-          if (columnIndex === 0) {
-            // newSourceData的第0维要单独处理，最后unshift到multiArray中
-            _multiArrayColumn0.push(item[shownFieldName])
-          }
+          source.forEach((item, index) => {
+            if (columnIndex === 0) {
+              // newSourceData的第0维要单独处理，最后unshift到multiArray中
+              _multiArrayColumn0.push(item[shownFieldName])
+            }
 
-          if (item[shownFieldName] && index === (defaultIndex[columnIndex] || 0)) {
-            // 选中的索引和值，默认取每列的第0个
-            multiIndex.push(index)
+            if (item[shownFieldName] && index === (defaultIndex[columnIndex] || 0)) {
+              // 选中的索引和值，默认取每列的第0个
+              multiIndex.push(index)
 
-            if (columnIndex < steps - 1) {
-              if (item[subsetFieldName]) {
-                // 开始处理下一维的数据
-                const _subsetArr = item[subsetFieldName].map(sub => sub[shownFieldName])
-                multiArray.push(_subsetArr)
-                handle(item[subsetFieldName], columnIndex + 1)
+              if (columnIndex < steps - 1) {
+                if (item[subsetFieldName]) {
+                  // 开始处理下一维的数据
+                  const _subsetArr = item[subsetFieldName].map(sub => sub[shownFieldName])
+                  multiArray.push(_subsetArr)
+                  handle(item[subsetFieldName], columnIndex + 1)
+                }
               }
             }
+          })
+
+          if (columnIndex === 0) {
+            multiArray.unshift(_multiArrayColumn0)
           }
-        })
-
-        if (columnIndex === 0) {
-          multiArray.unshift(_multiArrayColumn0)
         }
+
+        handle(newSourceData)
+
+        this.setData({
+          multiIndex,
+          multiArray
+        })
       }
-
-      handle(newSourceData)
-
-      this.setData({
-        multiIndex,
-        multiArray
-      })
     },
+    /**
+     * 获取默认值index
+     * @param {Array} newSourceData 源数组
+     */
     getDefaultIndex(newSourceData) {
       const {
         defaultIndex,
@@ -152,7 +159,7 @@ Component({
         return defaultIndex
       } else if (defaultValue.length) {
         if (!defaultValueUniqueField) {
-          console.error(new Error('你设置了"defaultValue"字段, 但是没有设置defaultValueUniqueField，这将无法识别默认选项，请补充后再试。'))
+          this.consoleError(new Error('你设置了"defaultValue"字段, 但是没有设置defaultValueUniqueField，这将无法识别默认选项，请补充后再试。'))
         }
         const _defaultIndex = []
         const handle = (source = [], columnIndex = 0) => {
@@ -163,12 +170,12 @@ Component({
           source.forEach((item, index) => {
             if (!item[defaultValueUniqueField]) {
               Interrupt = true
-              console.error(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${defaultValueUniqueField}"字段`))
+              this.consoleError(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${defaultValueUniqueField}"字段`))
             } else {
               defaultValue.forEach((def, key) => {
                 if (!def[defaultValueUniqueField]) {
                   Interrupt = true
-                  console.error(def, new Error(`"defaultValue"中第${key}项(从0开始计算)的对象中缺少"${defaultValueUniqueField}"字段`))
+                  this.consoleError(def, new Error(`"defaultValue"中第${key}项(从0开始计算)的对象中缺少"${defaultValueUniqueField}"字段`))
                 }
                 if (!Interrupt &&
                   (def[defaultValueUniqueField] === item[defaultValueUniqueField])) {
@@ -208,7 +215,7 @@ Component({
         source.forEach((item) => {
           if (!item[shownFieldName]) {
             countError++
-            console.error(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${shownFieldName}"字段`))
+            this.consoleError(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${shownFieldName}"字段`))
           }
 
           if (item[shownFieldName]) {
@@ -219,7 +226,7 @@ Component({
                 handle(item[subsetFieldName], columnIndex + 1)
               } else {
                 countError++
-                console.error(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${subsetFieldName}"字段`))
+                this.consoleError(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${subsetFieldName}"字段`))
               }
             }
           }
@@ -237,7 +244,7 @@ Component({
      * @param {Array} e.detail.value 用户选择的下标数组。
      */
     pickerChange(e) {
-      console.log('picker发送选择改变，携带值为', e.detail.value)
+      // console.log('picker发送选择改变，携带值为', e.detail.value)
 
       this.setData({
         multiIndex: e.detail.value
@@ -304,7 +311,7 @@ Component({
       let { multiIndex } = this.data
       const { column, value: changeIndex } = e.detail
 
-      console.log(`修改了Picker的第${column}列(从0开始计算)，选中了第${changeIndex}个值(从0开始计算)`)
+      // console.log(`修改了Picker的第${column}列(从0开始计算)，选中了第${changeIndex}个值(从0开始计算)`)
 
       // multiIndex变化了，所以也要同步更新multiArray
       multiIndex[column] = changeIndex
@@ -346,9 +353,21 @@ Component({
       })
       this.triggerEvent('columnchange', e)
     },
+    /**
+     * 用户点击了取消触发
+     * @param {Object} e 事件对象
+     */
     pickerCancel(e) {
       this.triggerEvent('cancel', e)
     },
+    /**
+     * 绑定console.error
+     * @param  {...any} arg 打印参数
+     */
+    consoleError(...arg) {
+      console.error(...arg)
+      console.warn('参考文档：https://github.com/IceApriler/miniprogram-picker')
+    }
   },
   attached() {
     if (this.data.autoSelect) {
