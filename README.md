@@ -57,10 +57,13 @@
 ## 使用方法
 
 1. 安装`miniprogram-picker`包。
+   > 提醒：若是你不想用npm，也可以直接下载最新[release](https://github.com/IceApriler/miniprogram-picker/releases)包放到项目的`components`中，就像用自己写的组件那样，只不过npm更加方便。
 
-   > ```bash
-   > npm install miniprogram-picker --production
-   > ```
+   ```bash
+   npm install miniprogram-picker --production
+   // 或者
+   npm install miniprogram-picker --save
+   ```
 
 2. 点击微信开发者工具中的菜单栏：工具 --> 构建 npm。此时你会发现项目中多出一个`miniprogram_npm`目录，里面有编译过的`miniprogram-picker`。
 
