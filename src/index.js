@@ -350,12 +350,9 @@ Component({
       this.triggerEvent('cancel', e)
     },
   },
-
-  lifetimes: {
-    attached() {
-      if (this.data.autoSelect) {
-        this.processData()
-      }
+  attached() {
+    if (this.data.autoSelect) {
+      this.processData()
     }
   }
 })
