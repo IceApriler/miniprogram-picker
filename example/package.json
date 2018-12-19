@@ -9,6 +9,6 @@
   "author": "IceApriler",
   "license": "ISC",
   "dependencies": {
-    "miniprogram-picker": "^1.0.3"
+    "miniprogram-picker": "^1.0.4"
   }
 }
