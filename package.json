@@ -1,6 +1,6 @@
 {
   "name": "miniprogram-picker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "微信小程序自定义组件Picker。本组件对微信小程序原生Picker组件进行了二次封装，开发者只需要提供固定数据结构的sourceData，再进行一些必要配置，本组件就可以自动帮助开发者处理联动逻辑。",
   "main": "miniprogram_dist/index.js",
   "scripts": {
@@ -31,6 +31,14 @@
     "type": "git",
     "url": "https://github.com/IceApriler/miniprogram-picker.git"
   },
+  "keywords": [
+    "miniprogram",
+    "picker",
+    "wechat",
+    "weapp",
+    "wechat-mini-program",
+    "miniprogram-component"
+  ],
   "author": "IceApriler",
   "license": "MIT",
   "devDependencies": {
