@@ -158,43 +158,45 @@ Component({
       if (defaultIndex.length) {
         return defaultIndex
       } else if (defaultValue.length) {
-        if (!defaultValueUniqueField) {
+        if (defaultValue.length !== steps) {
+          this.consoleError(new Error('你设置的"defaultValue"字段阶数与"steps"不符，请修改后再试。'))
+          return []
+        } else if (!defaultValueUniqueField) {
           this.consoleError(new Error('你设置了"defaultValue"字段, 但是没有设置defaultValueUniqueField，这将无法识别默认选项，请补充后再试。'))
-        }
-        const _defaultIndex = []
-        const handle = (source = [], columnIndex = 0) => {
-          // 默认值
-          _defaultIndex[columnIndex] = 0
-          // 若是有报错，则Interrupt为true，将中断
-          let Interrupt = false
-          source.forEach((item, index) => {
-            if (!item[defaultValueUniqueField]) {
-              Interrupt = true
-              this.consoleError(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${defaultValueUniqueField}"字段`))
-            } else {
-              defaultValue.forEach((def, key) => {
-                if (!def[defaultValueUniqueField]) {
-                  Interrupt = true
-                  this.consoleError(def, new Error(`"defaultValue"中第${key}项(从0开始计算)的对象中缺少"${defaultValueUniqueField}"字段`))
-                }
-                if (!Interrupt &&
-                  (def[defaultValueUniqueField] === item[defaultValueUniqueField])) {
-                  // 相等则表示选中
-                  _defaultIndex[columnIndex] = index
-                }
-              })
-
-              if (columnIndex < steps - 1) {
-                if (item[subsetFieldName]) {
-                  // 开始处理下一维的数据
-                  handle(item[subsetFieldName], columnIndex + 1)
-                }
-              }
+          return []
+        } else {
+          defaultValue.forEach((def, key) => {
+            if (!def[defaultValueUniqueField]) {
+              this.consoleError(def, new Error(`"defaultValue"中第${key}项(从0开始计算)的对象中缺少"${defaultValueUniqueField}"字段`))
             }
           })
+
+          const _defaultIndex = []
+          const handle = (source = [], columnIndex = 0) => {
+            // 默认值
+            _defaultIndex[columnIndex] = 0
+
+            source.forEach((item, index) => {
+              if (!item[defaultValueUniqueField]) {
+                this.consoleError(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${defaultValueUniqueField}"字段`))
+              } else if (
+                (defaultValue[columnIndex][defaultValueUniqueField]) ===
+                (item[defaultValueUniqueField])
+              ) {
+                _defaultIndex[columnIndex] = index
+
+                if (columnIndex < steps - 1) {
+                  if (item[subsetFieldName]) {
+                    // 开始处理下一维的数据
+                    handle(item[subsetFieldName], columnIndex + 1)
+                  }
+                }
+              }
+            })
+          }
+          handle(newSourceData)
+          return _defaultIndex
         }
-        handle(newSourceData)
-        return _defaultIndex
       } else {
         return []
       }
