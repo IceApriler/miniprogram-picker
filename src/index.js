@@ -141,6 +141,10 @@ Component({
           multiIndex,
           multiArray
         })
+
+        if (this.data.autoSelect) {
+          this.processData()
+        }
       }
     },
     /**
