@@ -5,6 +5,7 @@ Page({
   data: {
     result_1: [],
     result_2: [],
+    result_3: [],
     sourceData_1: [
       {
         id: 'id-1',
@@ -54,7 +55,53 @@ Page({
     sourceData_2: [
       { name: '河北', code: '0311', nextLevel: [{ name: '石家庄', code: '031101' }, { name: '保定', code: '031102' }]},
       { name: '北京', code: '0110', nextLevel: [{ name: '朝阳', code: '011001' }, { name: '海淀', code: '011002' }]},
-    ]
+    ],
+    sourceData_3: [{
+      id: '6cb8bd37-f8ae-4a6b-a236-3bab1b65cd8d',
+      parentId: '0',
+      name: '整形',
+      sonValue: [{
+        id: 'd4b6d3af-2edb-44a5-9851-c8964cf10d2c',
+        parentId: '6cb8bd37-f8ae-4a6b-a236-3bab1b65cd8d',
+        name: '眼部整形',
+        sonValue: [{
+          id: 'e531e96f-a081-40a7-a133-091be46983a2',
+          parentId: 'd4b6d3af-2edb-44a5-9851-c8964cf10d2c',
+          name: '双眼皮',
+          sonValue: []
+        }]
+      }, {
+        id: '403d93d3-5302-4682-a988-6dbfbe7ff563',
+        parentId: '6cb8bd37-f8ae-4a6b-a236-3bab1b65cd8d',
+        name: '胸部整形',
+        sonValue: [{
+          id: '46afdd93-c830-4d0d-bd5d-c0751a0c087a',
+          parentId: '403d93d3-5302-4682-a988-6dbfbe7ff563',
+          name: '丰胸',
+          sonValue: [{
+            id: '127a3cda-cd91-48b5-997c-6d56a4a02e80',
+            parentId: '46afdd93-c830-4d0d-bd5d-c0751a0c087a',
+            name: '自体脂肪丰胸',
+            sonValue: []
+          }]
+        }]
+      }]
+    }, {
+      id: 'a4f22a1a-0c49-46cd-bb1f-ca551b1e01cb',
+      parentId: '0',
+      name: '皮肤',
+      sonValue: [{
+        id: 'dfa5137c-616b-403c-a552-164e05518072',
+        parentId: 'a4f22a1a-0c49-46cd-bb1f-ca551b1e01cb',
+        name: '脱毛美容',
+        sonValue: []
+      }, {
+        id: 'bfd1eb85-93c1-489e-acba-ac3e783c83f0',
+        parentId: 'a4f22a1a-0c49-46cd-bb1f-ca551b1e01cb',
+        name: '艺术纹绣',
+        sonValue: []
+      }]
+    }]
   },
   /**
    * Picker用户点击确认时触发
@@ -69,6 +116,7 @@ Page({
     const list = {
       picker_1: 'result_1',
       picker_2: 'result_2',
+      picker_3: 'result_3',
     }
     console.log('多级联动结果:', selectedIndex, selectedArray)
     const change = {}
