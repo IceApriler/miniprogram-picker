@@ -5,6 +5,7 @@ function isExist(field) {
 }
 
 Component({
+  externalClasses: ['picker-class'],
   /**
    * 组件的属性列表
    */
