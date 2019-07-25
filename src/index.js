@@ -1,6 +1,7 @@
 /* 参考文档: https://github.com/IceApriler/miniprogram-picker */
 
 Component({
+  externalClasses: ['picker-class'],
   /**
    * 组件的属性列表
    */
@@ -141,6 +142,10 @@ Component({
           multiIndex,
           multiArray
         })
+
+        if (this.data.autoSelect) {
+          this.processData()
+        }
       }
     },
     /**
