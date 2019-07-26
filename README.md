@@ -1,5 +1,11 @@
 # miniprogram-picker
 
+![license](https://img.shields.io/github/license/IceApriler/miniprogram-picker)
+![npm version](https://img.shields.io/npm/v/miniprogram-picker)
+![npm dm](https://img.shields.io/npm/dm/miniprogram-picker)
+![last commit](https://img.shields.io/github/last-commit/IceApriler/miniprogram-picker)
+![stars](https://img.shields.io/github/stars/IceApriler/miniprogram-picker?style=social)
+
 ## 简介
 
 - 微信小程序的Picker组件只是半成品组件，在启用多级联动时需要监听`bindcolumnchange`事件，来手动更改`range`和`value`的值，从而完成Picker的联动变化，比较麻烦，不利于在不同的业务逻辑中的复用。
