@@ -120,12 +120,12 @@ Component({
             _multiArrayColumn0.push(item[shownFieldName])
           }
 
-          if (item[shownFieldName] && index === (defaultIndex[columnIndex] || 0)) {
+          if (isExist(item[shownFieldName]) && index === (defaultIndex[columnIndex] || 0)) {
             // 选中的索引和值，默认取每列的第0个
             multiIndex.push(index)
 
             if (columnIndex < steps - 1) {
-              if (item[subsetFieldName]) {
+              if (isExist(item[subsetFieldName])) {
                 // 开始处理下一维的数据
                 const _subsetArr = item[subsetFieldName].map(sub => sub[shownFieldName])
                 multiArray.push(_subsetArr)
