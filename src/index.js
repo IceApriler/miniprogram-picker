@@ -1,6 +1,11 @@
 /* 参考文档: https://github.com/IceApriler/miniprogram-picker */
 
+function isExist(field) {
+  return field !== null && field !== undefined
+}
+
 Component({
+  externalClasses: ['picker-class'],
   /**
    * 组件的属性列表
    */
@@ -99,48 +104,51 @@ Component({
       // 源数组更新，则需要更新multiIndex、multiArray
       const multiIndex = []
       const multiArray = []
-      const { countError } = this.checkSourceData(newSourceData)
-      if (countError > 0) {
-        console.warn(`miniprogram-picker: 初始化源数组时检测到有${countError}个错误，为了方便排查修改已经为你做出了相关提示，请修改后再试，务必保证数据源的数据结构无误。`)
-      } else {
-        const defaultIndex = this.getDefaultIndex(newSourceData)
-        const handle = (source = [], columnIndex = 0) => {
-          // 当前遍历Picker的第columnIndex列，
-          // 当columnIndex = 0时，source表示sourceData，其它则表示子集subset
-          const _multiArrayColumn0 = []
+      newSourceData = this.checkSourceData(newSourceData)
 
-          source.forEach((item, index) => {
-            if (columnIndex === 0) {
-              // newSourceData的第0维要单独处理，最后unshift到multiArray中
-              _multiArrayColumn0.push(item[shownFieldName])
-            }
+      console.warn(newSourceData)
 
-            if (item[shownFieldName] && index === (defaultIndex[columnIndex] || 0)) {
-              // 选中的索引和值，默认取每列的第0个
-              multiIndex.push(index)
+      const defaultIndex = this.getDefaultIndex(newSourceData)
+      const handle = (source = [], columnIndex = 0) => {
+        // 当前遍历Picker的第columnIndex列，
+        // 当columnIndex = 0时，source表示sourceData，其它则表示子集subset
+        const _multiArrayColumn0 = []
 
-              if (columnIndex < steps - 1) {
-                if (item[subsetFieldName]) {
-                  // 开始处理下一维的数据
-                  const _subsetArr = item[subsetFieldName].map(sub => sub[shownFieldName])
-                  multiArray.push(_subsetArr)
-                  handle(item[subsetFieldName], columnIndex + 1)
-                }
+        source.forEach((item, index) => {
+          if (columnIndex === 0) {
+            // newSourceData的第0维要单独处理，最后unshift到multiArray中
+            _multiArrayColumn0.push(item[shownFieldName])
+          }
+
+          if (isExist(item[shownFieldName]) && index === (defaultIndex[columnIndex] || 0)) {
+            // 选中的索引和值，默认取每列的第0个
+            multiIndex.push(index)
+
+            if (columnIndex < steps - 1) {
+              if (isExist(item[subsetFieldName])) {
+                // 开始处理下一维的数据
+                const _subsetArr = item[subsetFieldName].map(sub => sub[shownFieldName])
+                multiArray.push(_subsetArr)
+                handle(item[subsetFieldName], columnIndex + 1)
               }
             }
-          })
-
-          if (columnIndex === 0) {
-            multiArray.unshift(_multiArrayColumn0)
           }
-        }
-
-        handle(newSourceData)
-
-        this.setData({
-          multiIndex,
-          multiArray
         })
+
+        if (columnIndex === 0) {
+          multiArray.unshift(_multiArrayColumn0)
+        }
+      }
+
+      handle(newSourceData)
+
+      this.setData({
+        multiIndex,
+        multiArray
+      })
+
+      if (this.data.autoSelect) {
+        this.processData()
       }
     },
     /**
@@ -209,34 +217,33 @@ Component({
      */
     checkSourceData(sourceData) {
       const { shownFieldName, subsetFieldName, steps } = this.data
-      let countError = 0
       const handle = (source = [], columnIndex = 0) => {
         // 当前遍历Picker的第columnIndex列，
         // 当columnIndex = 0时，source表示sourceData，其它则表示子集subset
-
-        source.forEach((item) => {
-          if (!item[shownFieldName]) {
-            countError++
+        if (!source.length) {
+          const temp = {}
+          temp[shownFieldName] = ''
+          temp[subsetFieldName] = []
+          source.push(temp)
+        }
+        return source.map((item) => {
+          if (!isExist(item[shownFieldName])) {
             this.consoleError(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${shownFieldName}"字段`))
+            item[shownFieldName] = ''
           }
 
-          if (item[shownFieldName]) {
-            // 有shownFieldName字段才会去遍历subsetFieldName字段
-            if (columnIndex < steps - 1) {
-              if (item[subsetFieldName]) {
-                // 开始处理下一维的数据
-                handle(item[subsetFieldName], columnIndex + 1)
-              } else {
-                countError++
-                this.consoleError(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${subsetFieldName}"字段`))
-              }
+          // 有shownFieldName字段才会去遍历subsetFieldName字段
+          if (columnIndex < steps - 1) {
+            if (!isExist(item[subsetFieldName])) {
+              this.consoleError(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${subsetFieldName}"字段`))
             }
+            // 开始处理下一维的数据
+            item[subsetFieldName] = handle(item[subsetFieldName], columnIndex + 1)
           }
+          return item
         })
       }
-
-      handle(sourceData)
-      return { countError }
+      return handle(sourceData)
     },
 
     /**

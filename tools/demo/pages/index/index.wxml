@@ -51,3 +51,19 @@
       当前选择：<view wx:for="{{result_2}}" wx:key="index">{{item['name']}}</view>
     </view>
 </comp>
+
+<comp
+  sourceData="{{sourceData_3}}"
+  steps="{{4}}"
+  shownFieldName="{{'name'}}"
+  subsetFieldName="{{'sonValue'}}"
+  otherNeedFieldsName="{{['id']}}"
+  initColumnSelectedIndex
+  bindchange="pickerChange"
+  bindcancel="pickerCancel"
+  bindcolumnchange="pickerColumnchange"
+  data-picker="picker_3">
+    <view class="picker">
+      当前选择：<view wx:for="{{result_3}}" wx:key="index">{{item['name']}}</view>
+    </view>
+</comp>

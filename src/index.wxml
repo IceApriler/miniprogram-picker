@@ -1,4 +1,5 @@
 <picker 
+  class="picker picker-class"
   mode="multiSelector"
   bindchange="pickerChange"
   bindcolumnchange="pickerColumnChange"
