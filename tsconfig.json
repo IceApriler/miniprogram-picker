@@ -1,0 +1,14 @@
+{
+  "include": [
+    "src/**/*.ts",
+    "build/**/*.ts"
+  ],
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "target": "es6",
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+    "types": ["miniprogram-api-typings", "node"]
+  }
+}
