@@ -1,0 +1,69 @@
+<!-- 多级联动 -->
+<!-- 
+  sourceData: 源数组，格式必须为数组和对象的集合，参考示例
+  steps: 多级联动的阶数，默认为1
+  shownFieldName: 多级联动展示数据的字段名称，默认为name
+  subsetFieldName: 多级联动的子节点的字段名称，默认为subset
+  otherNeedFieldsName: 若需要额外返回其他字段的数据，可以设置otherFields为数组，参考示例
+  autoSelect: 初始化时，自动选择每列的第0项，返回给开发者。
+  initColumnSelectedIndex: 选择了第n列后，是否将大于n的列的自动初始化第0个(滚动至最上层)
+  defaultIndex: 默认选中项的下标数组，优先于defaultValue
+  defaultValue: 默认选中项的值数组，此字段生效时，defaultValueUniqueField必填
+  defaultValueUniqueField: 默认选中项的值数组的唯一字段，用来和源数组进行比对
+  bindchange: 回调函数，参考示例
+ -->
+<comp
+  sourceData="{{sourceData1}}"
+  steps="{{3}}"
+  shownFieldName="{{'name'}}"
+  subsetFieldName="{{'sonValue'}}"
+  otherNeedFieldsName="{{['id', 'other']}}"
+  defaultValue="{{[{name: '2'}, {name: '2.2'}, {name: '2.2.1'}]}}"
+  defaultValueUniqueField="{{'name'}}"
+  autoSelect="{{true}}"
+  initColumnSelectedIndex
+  disabled="{{false}}"
+  bindchange="pickerChange"
+  bindcancel="pickerCancel"
+  bindcolumnchange="pickerColumnchange"
+  data-picker="picker1">
+    <view class="picker">
+      当前选择：<view wx:for="{{result1}}" wx:key="index">{{item['name']}}</view>
+    </view>
+</comp>
+
+<comp
+  sourceData="{{sourceData2}}"
+  steps="{{2}}"
+  shownFieldName="{{'name'}}"
+  subsetFieldName="{{'nextLevel'}}"
+  otherNeedFieldsName="{{['code']}}"
+  defaultValue="{{[{code: '0110'}, {code: '011002'}]}}"
+  defaultValueUniqueField="{{'code'}}"
+  autoSelect="{{true}}"
+  initColumnSelectedIndex
+  disabled="{{false}}"
+  bindchange="pickerChange"
+  bindcancel="pickerCancel"
+  bindcolumnchange="pickerColumnchange"
+  data-picker="picker2">
+    <view class="picker">
+      当前选择：<view wx:for="{{result2}}" wx:key="index">{{item['name']}}</view>
+    </view>
+</comp>
+
+<comp
+  sourceData="{{sourceData3}}"
+  steps="{{4}}"
+  shownFieldName="{{'name'}}"
+  subsetFieldName="{{'sonValue'}}"
+  otherNeedFieldsName="{{['id']}}"
+  initColumnSelectedIndex
+  bindchange="pickerChange"
+  bindcancel="pickerCancel"
+  bindcolumnchange="pickerColumnchange"
+  data-picker="picker3">
+    <view class="picker">
+      当前选择：<view wx:for="{{result3}}" wx:key="index">{{item['name']}}</view>
+    </view>
+</comp>

@@ -1,27 +1,118 @@
 /* 参考文档: https://github.com/IceApriler/miniprogram-picker */
 
-function isExist(field) {
+function isExist(field: any) {
   return field !== null && field !== undefined
 }
 
-Component({
+interface TData {
+  /** Picker当前所选择的索引数组 => 比如:[0, 0, 2]，表示第一列选择第0项，第二列选择第0项，第三列选择第2项。 */
+  multiIndex: number[],
+  /** Picker当前所展示的数组 => 比如:[['河北', '山东'], ['石家庄', '保定'], ['桥西区', '裕华区', '长安区']]。 */
+  multiArray: string[]
+  /**
+   * 用户点击确定后，所选择的值数组 => 比如:
+   * [{name: '河北', id: '3110'}, {name: '石家庄', id: '3110xx'}, {name: '长安区', id: '3110xxx'}]。
+   */
+  selectedArray: object[]
+}
+
+interface TProperty {
+  /** 初始化时，是否需要自动返回结果给开发者 */
+  autoSelect: {
+    type: typeof Boolean
+    value: boolean
+  }
+  /** 源数组，sourceData有几维，Picker就可以有几阶 */
+  sourceData: {
+    type: typeof Array
+    value: object[]
+    observer(newVal: object[], oldVal: object[], changedPath: string[]): void
+  }
+  /** 阶数 */
+  steps: {
+    type: typeof Number
+    value: number
+  }
+  /** 展示数据的字段名称 */
+  shownFieldName: {
+    type: typeof String
+    value: string
+  }
+  /** 子节点名称 */
+  subsetFieldName: {
+    type: typeof String
+    value: string
+  }
+  /** 其他需要返回的字段 */
+  otherNeedFieldsName: {
+    type: typeof Array
+    value: string[]
+  },
+  /** 选择了第n列后，是否将大于n的列的选择值自动初始化为0 */
+  initColumnSelectedIndex: {
+    type: typeof Boolean
+    value: boolean
+  },
+  /** 默认选中项的下标数组 */
+  defaultIndex: {
+    type: typeof Array
+    value: number[]
+  },
+  /** 默认选中项的值数组 */
+  defaultValue: {
+    type: typeof Array
+    value: number[]
+  },
+  /** 默认选中项的值数组的唯一字段，用来和源数组进行比对 */
+  defaultValueUniqueField: {
+    type: typeof String
+    value: string
+  },
+  /** 是否禁用 */
+  disabled: {
+    type: typeof Boolean
+    value: boolean
+  }
+  [key: string]: any
+}
+
+interface TMethod {
+  /** 监听源数组更新变化 */
+  sourceDataChange(newSourceData: object[]): void
+  /** 获取默认值index */
+  getDefaultIndex(newSourceData: object[]): any
+  /** 校验源数组是否正确 */
+  checkSourceData(sourceData: object[]): any
+  /** 用户点击了确认 */
+  pickerChange(e: event.PickerChange<IAnyObject>): void
+  /** 用户滚动了某一列 */
+  pickerColumnChange(e: event.PickerChange<IAnyObject>): void
+  /** 用户点击了取消触发 */
+  pickerCancel(e: event.PickerChange<IAnyObject>): void
+  /** 处理最终数据，将返回给开发者。 */
+  processData(): void
+  /** 绑定console.error */
+  consoleError(...arg: any[]): void
+  [key: string]: any
+}
+
+Component<TData, TProperty, TMethod>({
   externalClasses: ['picker-class'],
   /**
    * 组件的属性列表
    */
   properties: {
-    // 初始化时，是否需要自动返回结果给开发者
     autoSelect: {
       type: Boolean,
       value: false
     },
-    // 源数组，sourceData有几维，Picker就可以有几阶
     sourceData: {
       type: Array,
       value: [],
-      observer: 'sourceDataChange'
+      observer: function(newVal: []) {
+        this.sourceDataChange(newVal)
+      }
     },
-    // 阶数
     steps: {
       type: Number,
       value: 1
@@ -73,37 +164,23 @@ Component({
    */
   data: {
     // Picker当前所选择的索引数组 => 比如:[0, 0, 2]，表示第一列选择第0项，第二列选择第0项，第三列选择第2项。
-    multiIndex: {
-      type: Array,
-      value: [],
-    },
+    multiIndex: [],
     // Picker当前所展示的数组 => 比如:[['河北', '山东'], ['石家庄', '保定'], ['桥西区', '裕华区', '长安区']]。
-    multiArray: {
-      type: Array,
-      value: [],
-    },
+    multiArray: [],
     // 用户点击确定后，所选择的值数组 => 比如:
     // [{name: '河北', id: '3110'}, {name: '石家庄', id: '3110xx'}, {name: '长安区', id: '3110xxx'}]。
-    selectedArray: {
-      type: Array,
-      value: [],
-    },
+    selectedArray: [],
   },
 
   /**
    * 组件的方法列表
    */
   methods: {
-    /**
-     * 监听源数组更新变化
-     *
-     * @param {Array} newSourceData 源数组，newSourceData有几维，Picker就可以有几阶。
-     */
-    sourceDataChange(newSourceData) {
+    sourceDataChange(newSourceData: any) {
       const { shownFieldName, subsetFieldName, steps } = this.data
       // 源数组更新，则需要更新multiIndex、multiArray
-      const multiIndex = []
-      const multiArray = []
+      const multiIndex: number[] = []
+      const multiArray: any[] = []
       newSourceData = this.checkSourceData(newSourceData)
 
       console.warn(newSourceData)
@@ -151,11 +228,7 @@ Component({
         this.processData()
       }
     },
-    /**
-     * 获取默认值index
-     * @param {Array} newSourceData 源数组
-     */
-    getDefaultIndex(newSourceData) {
+    getDefaultIndex(newSourceData: any) {
       const {
         defaultIndex,
         defaultValue,
@@ -209,13 +282,7 @@ Component({
         return []
       }
     },
-
-    /**
-     * 校验源数组是否正确
-     *
-     * @param {Array} sourceData 源数组
-     */
-    checkSourceData(sourceData) {
+    checkSourceData(sourceData: any) {
       const { shownFieldName, subsetFieldName, steps } = this.data
       const handle = (source = [], columnIndex = 0) => {
         // 当前遍历Picker的第columnIndex列，
@@ -247,8 +314,6 @@ Component({
     },
 
     /**
-     * 用户点击了确认。
-     *
      * @param {Object} e 事件对象，具体参考微信小程序api。
      * @param {Array} e.detail.value 用户选择的下标数组。
      */
@@ -260,11 +325,6 @@ Component({
       })
       this.processData()
     },
-
-    /**
-     * 处理最终数据，将返回给开发者。
-     *
-     */
     processData() {
       const {
         sourceData,
@@ -302,12 +362,6 @@ Component({
       }
       this.triggerEvent('change', detail)
     },
-
-    /**
-     * 用户滚动了某一列。
-     *
-     * @param {Object} e 事件对象，具体参考微信小程序api。
-     */
     pickerColumnChange(e) {
       const {
         shownFieldName,
@@ -362,17 +416,9 @@ Component({
       })
       this.triggerEvent('columnchange', e)
     },
-    /**
-     * 用户点击了取消触发
-     * @param {Object} e 事件对象
-     */
     pickerCancel(e) {
       this.triggerEvent('cancel', e)
     },
-    /**
-     * 绑定console.error
-     * @param  {...any} arg 打印参数
-     */
     consoleError(...arg) {
       console.error(...arg)
       console.warn('参考文档：https://github.com/IceApriler/miniprogram-picker')
