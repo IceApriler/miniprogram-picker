@@ -1,22 +1,26 @@
 /* 参考文档: https://github.com/IceApriler/miniprogram-picker */
 
-function isExist(field: any) {
+function isExist(field: any): boolean {
   return field !== null && field !== undefined
 }
 
-interface TData {
+interface IData {
   /** Picker当前所选择的索引数组 => 比如:[0, 0, 2]，表示第一列选择第0项，第二列选择第0项，第三列选择第2项。 */
-  multiIndex: number[],
+  multiIndex: number[]
   /** Picker当前所展示的数组 => 比如:[['河北', '山东'], ['石家庄', '保定'], ['桥西区', '裕华区', '长安区']]。 */
   multiArray: string[]
   /**
    * 用户点击确定后，所选择的值数组 => 比如:
    * [{name: '河北', id: '3110'}, {name: '石家庄', id: '3110xx'}, {name: '长安区', id: '3110xxx'}]。
    */
-  selectedArray: object[]
+  selectedArray: any[]
 }
 
-interface TProperty {
+interface Item {
+  [key: string]: any
+}
+
+interface IProperty {
   /** 初始化时，是否需要自动返回结果给开发者 */
   autoSelect: {
     type: typeof Boolean
@@ -25,8 +29,8 @@ interface TProperty {
   /** 源数组，sourceData有几维，Picker就可以有几阶 */
   sourceData: {
     type: typeof Array
-    value: object[]
-    observer(newVal: object[], oldVal: object[], changedPath: string[]): void
+    value: Item[]
+    observer(newVal: any[], oldVal: any[], changedPath: string[]): void
   }
   /** 阶数 */
   steps: {
@@ -47,27 +51,27 @@ interface TProperty {
   otherNeedFieldsName: {
     type: typeof Array
     value: string[]
-  },
+  }
   /** 选择了第n列后，是否将大于n的列的选择值自动初始化为0 */
   initColumnSelectedIndex: {
     type: typeof Boolean
     value: boolean
-  },
+  }
   /** 默认选中项的下标数组 */
   defaultIndex: {
     type: typeof Array
     value: number[]
-  },
+  }
   /** 默认选中项的值数组 */
   defaultValue: {
     type: typeof Array
-    value: number[]
-  },
+    value: any[]
+  }
   /** 默认选中项的值数组的唯一字段，用来和源数组进行比对 */
   defaultValueUniqueField: {
     type: typeof String
     value: string
-  },
+  }
   /** 是否禁用 */
   disabled: {
     type: typeof Boolean
@@ -76,17 +80,17 @@ interface TProperty {
   [key: string]: any
 }
 
-interface TMethod {
+interface IMethod {
   /** 监听源数组更新变化 */
-  sourceDataChange(newSourceData: object[]): void
+  sourceDataChange(newSourceData: any[]): void
   /** 获取默认值index */
-  getDefaultIndex(newSourceData: object[]): any
+  getDefaultIndex(newSourceData: any[]): any
   /** 校验源数组是否正确 */
-  checkSourceData(sourceData: object[]): any
+  checkSourceData(sourceData: any[]): any
   /** 用户点击了确认 */
   pickerChange(e: event.PickerChange<IAnyObject>): void
   /** 用户滚动了某一列 */
-  pickerColumnChange(e: event.PickerChange<IAnyObject>): void
+  pickerColumnChange(e: event.PickerColumnChange): void
   /** 用户点击了取消触发 */
   pickerCancel(e: event.PickerChange<IAnyObject>): void
   /** 处理最终数据，将返回给开发者。 */
@@ -96,11 +100,8 @@ interface TMethod {
   [key: string]: any
 }
 
-Component<TData, TProperty, TMethod>({
+Component<IData, IProperty, IMethod>({
   externalClasses: ['picker-class'],
-  /**
-   * 组件的属性列表
-   */
   properties: {
     autoSelect: {
       type: Boolean,
@@ -117,64 +118,44 @@ Component<TData, TProperty, TMethod>({
       type: Number,
       value: 1
     },
-    // 展示数据的字段名称
     shownFieldName: {
       type: String,
       value: 'name'
     },
-    // 子节点名称，
     subsetFieldName: {
       type: String,
       value: 'subset'
     },
-    // 其他需要返回的字段
     otherNeedFieldsName: {
       type: Array,
       value: []
     },
-    // 选择了第n列后，是否将大于n的列的选择值自动初始化为0
     initColumnSelectedIndex: {
       type: Boolean,
-      value: false,
+      value: false
     },
-    // 默认选中项的下标数组
     defaultIndex: {
       type: Array,
       value: []
     },
-    // 默认选中项的值数组
     defaultValue: {
       type: Array,
       value: []
     },
-    // 默认选中项的值数组的唯一字段，用来和源数组进行比对
     defaultValueUniqueField: {
       type: String,
       value: ''
     },
-    // 是否禁用
     disabled: {
       type: Boolean,
-      value: false,
+      value: false
     }
   },
-
-  /**
-   * 组件的初始数据
-   */
   data: {
-    // Picker当前所选择的索引数组 => 比如:[0, 0, 2]，表示第一列选择第0项，第二列选择第0项，第三列选择第2项。
     multiIndex: [],
-    // Picker当前所展示的数组 => 比如:[['河北', '山东'], ['石家庄', '保定'], ['桥西区', '裕华区', '长安区']]。
     multiArray: [],
-    // 用户点击确定后，所选择的值数组 => 比如:
-    // [{name: '河北', id: '3110'}, {name: '石家庄', id: '3110xx'}, {name: '长安区', id: '3110xxx'}]。
-    selectedArray: [],
+    selectedArray: []
   },
-
-  /**
-   * 组件的方法列表
-   */
   methods: {
     sourceDataChange(newSourceData: any) {
       const { shownFieldName, subsetFieldName, steps } = this.data
@@ -186,12 +167,12 @@ Component<TData, TProperty, TMethod>({
       console.warn(newSourceData)
 
       const defaultIndex = this.getDefaultIndex(newSourceData)
-      const handle = (source = [], columnIndex = 0) => {
+      const handle = (source = [], columnIndex = 0): void => {
         // 当前遍历Picker的第columnIndex列，
         // 当columnIndex = 0时，source表示sourceData，其它则表示子集subset
-        const _multiArrayColumn0 = []
+        const _multiArrayColumn0: any[] = []
 
-        source.forEach((item, index) => {
+        source.forEach((item: any, index: number) => {
           if (columnIndex === 0) {
             // newSourceData的第0维要单独处理，最后unshift到multiArray中
             _multiArrayColumn0.push(item[shownFieldName])
@@ -204,7 +185,7 @@ Component<TData, TProperty, TMethod>({
             if (columnIndex < steps - 1) {
               if (isExist(item[subsetFieldName])) {
                 // 开始处理下一维的数据
-                const _subsetArr = item[subsetFieldName].map(sub => sub[shownFieldName])
+                const _subsetArr = item[subsetFieldName].map((sub: any) => sub[shownFieldName])
                 multiArray.push(_subsetArr)
                 handle(item[subsetFieldName], columnIndex + 1)
               }
@@ -229,13 +210,7 @@ Component<TData, TProperty, TMethod>({
       }
     },
     getDefaultIndex(newSourceData: any) {
-      const {
-        defaultIndex,
-        defaultValue,
-        defaultValueUniqueField,
-        steps,
-        subsetFieldName
-      } = this.data
+      const { defaultIndex, defaultValue, defaultValueUniqueField, steps, subsetFieldName } = this.data
       if (defaultIndex.length) {
         return defaultIndex
       } else if (defaultValue.length) {
@@ -252,18 +227,15 @@ Component<TData, TProperty, TMethod>({
             }
           })
 
-          const _defaultIndex = []
-          const handle = (source = [], columnIndex = 0) => {
+          const _defaultIndex: any[] = []
+          const handle = (source: any[] = [], columnIndex = 0): void => {
             // 默认值
             _defaultIndex[columnIndex] = 0
 
-            source.forEach((item, index) => {
+            source.forEach((item: any, index: number) => {
               if (!item[defaultValueUniqueField]) {
                 this.consoleError(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${defaultValueUniqueField}"字段`))
-              } else if (
-                (defaultValue[columnIndex][defaultValueUniqueField]) ===
-                (item[defaultValueUniqueField])
-              ) {
+              } else if (defaultValue[columnIndex][defaultValueUniqueField] === item[defaultValueUniqueField]) {
                 _defaultIndex[columnIndex] = index
 
                 if (columnIndex < steps - 1) {
@@ -284,16 +256,16 @@ Component<TData, TProperty, TMethod>({
     },
     checkSourceData(sourceData: any) {
       const { shownFieldName, subsetFieldName, steps } = this.data
-      const handle = (source = [], columnIndex = 0) => {
+      const handle = (source: any[] = [], columnIndex = 0): any[] => {
         // 当前遍历Picker的第columnIndex列，
         // 当columnIndex = 0时，source表示sourceData，其它则表示子集subset
         if (!source.length) {
-          const temp = {}
+          const temp: IAnyObject = {}
           temp[shownFieldName] = ''
           temp[subsetFieldName] = []
           source.push(temp)
         }
-        return source.map((item) => {
+        return source.map(item => {
           if (!isExist(item[shownFieldName])) {
             this.consoleError(item, new Error(`源数组第${columnIndex}维(从0开始计算)的对象中缺少"${shownFieldName}"字段`))
             item[shownFieldName] = ''
@@ -321,24 +293,18 @@ Component<TData, TProperty, TMethod>({
       // console.log('picker发送选择改变，携带值为', e.detail.value)
 
       this.setData({
-        multiIndex: e.detail.value
+        multiIndex: e.detail.value as number[]
       })
       this.processData()
     },
     processData() {
-      const {
-        sourceData,
-        shownFieldName,
-        subsetFieldName,
-        otherNeedFieldsName,
-        multiIndex
-      } = this.data
-      const selectedArray = []
+      const { sourceData, shownFieldName, subsetFieldName, otherNeedFieldsName, multiIndex } = this.data
+      const selectedArray: any[] = []
 
-      const handle = (source = [], columnIndex = 0) => {
-        source.forEach((item, index) => {
+      const handle = (source: any[] = [], columnIndex = 0): void => {
+        source.forEach((item: any, index: number) => {
           if (index === multiIndex[columnIndex]) {
-            const selectedItem = {}
+            const selectedItem: IAnyObject = {}
             selectedItem[shownFieldName] = item[shownFieldName]
             otherNeedFieldsName.forEach(key => {
               selectedItem[key] = item[key]
@@ -360,17 +326,11 @@ Component<TData, TProperty, TMethod>({
         selectedIndex: this.data.multiIndex,
         selectedArray: this.data.selectedArray
       }
+      console.warn(this.data)
       this.triggerEvent('change', detail)
     },
     pickerColumnChange(e) {
-      const {
-        shownFieldName,
-        subsetFieldName,
-        multiArray,
-        sourceData,
-        steps,
-        initColumnSelectedIndex
-      } = this.data
+      const { shownFieldName, subsetFieldName, multiArray, sourceData, steps, initColumnSelectedIndex } = this.data
       let { multiIndex } = this.data
       const { column, value: changeIndex } = e.detail
 
@@ -391,7 +351,7 @@ Component<TData, TProperty, TMethod>({
         multiIndex = _multiIndex
       }
 
-      const handle = (source = [], columnIndex = 0) => {
+      const handle = (source: any[] = [], columnIndex = 0): void => {
         // 当前遍历第 columnIndex 列
         source.forEach((item, index) => {
           if (index === multiIndex[columnIndex]) {
@@ -399,7 +359,7 @@ Component<TData, TProperty, TMethod>({
               if (!item[subsetFieldName]) {
                 item[subsetFieldName] = []
               }
-              const multiArrayItem = item[subsetFieldName].map((sub) => sub[shownFieldName])
+              const multiArrayItem = item[subsetFieldName].map((sub: any) => sub[shownFieldName])
               // 从第1列开始，才有可能变化
               multiArray[columnIndex + 1] = multiArrayItem
 
@@ -412,7 +372,7 @@ Component<TData, TProperty, TMethod>({
 
       this.setData({
         multiArray,
-        multiIndex,
+        multiIndex
       })
       this.triggerEvent('columnchange', e)
     },
