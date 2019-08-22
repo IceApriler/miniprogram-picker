@@ -34,7 +34,7 @@ export class Weapp {
     this.devPath = devPath
 
     this.tsSrc = path.resolve(this.srcPath, '**/*.ts')
-    this.fileSrc = ['.js', '.json', '.wxss', '.wxml'].map(ext => path.resolve(this.srcPath, `**/*${ext}`))
+    this.fileSrc = ['.d.ts', '.js', '.json', '.wxss', '.wxml'].map(ext => path.resolve(this.srcPath, `**/*${ext}`))
     this.init()
   }
 

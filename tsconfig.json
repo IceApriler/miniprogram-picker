@@ -9,6 +9,9 @@
     "target": "es6",
     "moduleResolution": "node",
     "strictNullChecks": true,
+    "declaration": true,
+    "lib": [],
+    "skipLibCheck": true,
     "types": ["miniprogram-api-typings", "node"]
   }
 }
